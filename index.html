@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语重拾计划 · 学习路线图</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f7f7f7; color: #3c3c3c; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+.hero { background: linear-gradient(135deg, #58cc02, #46a302); color: #fff; border-radius: 20px; padding: 40px 30px; margin-bottom: 30px; text-align: center; }
+.hero h1 { font-size: 32px; margin-bottom: 8px; }
+.hero .subtitle { font-size: 16px; opacity: 0.9; }
+.hero .stats { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
+.hero .stat { text-align: center; }
+.hero .stat-val { font-size: 28px; font-weight: 800; }
+.hero .stat-label { font-size: 13px; opacity: 0.8; }
+
+.section { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.section h2 { font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+.principle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.principle-card { background: #f0faf0; border-radius: 12px; padding: 16px; }
+.principle-card .icon { font-size: 24px; margin-bottom: 6px; }
+.principle-card h3 { font-size: 15px; margin-bottom: 4px; }
+.principle-card p { font-size: 13px; color: #666; }
+
+.level { border: 2px solid #e5e5e5; border-radius: 14px; padding: 20px; margin-bottom: 16px; transition: all 0.3s; }
+.level.current { border-color: #58cc02; background: #f8fff8; }
+.level-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.level-icon { font-size: 32px; }
+.level-title { font-size: 18px; font-weight: 700; }
+.level-badge { background: #e5e5e5; color: #888; font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+.level.current .level-badge { background: #58cc02; color: #fff; }
+
+.unit { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.unit:last-child { border-bottom: none; }
+.unit-num { width: 32px; height: 32px; border-radius: 50%; background: #e5e5e5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #999; flex-shrink: 0; }
+.unit.active .unit-num { background: #58cc02; color: #fff; }
+.unit.completed .unit-num { background: #ffd700; color: #fff; }
+.unit-info { flex: 1; }
+.unit-name { font-size: 14px; font-weight: 600; }
+.unit-desc { font-size: 12px; color: #999; }
+.unit-days { font-size: 12px; color: #58cc02; font-weight: 600; white-space: nowrap; }
+
+.daily-routine { }
+.routine-step { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+.routine-step:last-child { border-bottom: none; }
+.step-num { width: 28px; height: 28px; border-radius: 50%; background: #58cc02; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.step-content h4 { font-size: 14px; margin-bottom: 2px; }
+.step-content p { font-size: 12px; color: #888; }
+
+.game-features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.feature { text-align: center; padding: 12px 8px; background: #f8f8f8; border-radius: 10px; }
+.feature .icon { font-size: 28px; margin-bottom: 4px; }
+.feature .name { font-size: 13px; font-weight: 600; }
+.feature .desc { font-size: 11px; color: #888; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>🌍 英语重拾计划</h1>
+  <p class="subtitle">每天20分钟 · 游戏化学习 · 从基础到自信表达</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">140</div><div class="stat-label">天总课程</div></div>
+    <div class="stat"><div class="stat-val">20</div><div class="stat-label">分钟/天</div></div>
+    <div class="stat"><div class="stat-val">3</div><div class="stat-label">个等级</div></div>
+    <div class="stat"><div class="stat-val">20</div><div class="stat-label">个单元</div></div>
+  </div>
+</div>
+
+<!-- 学习原则 -->
+<div class="section">
+  <h2>📋 设计原则</h2>
+  <div class="principle-grid">
+    <div class="principle-card">
+      <div class="icon">🎯</div>
+      <h3>实用优先</h3>
+      <p>聚焦日常交流和工作场景，学完就能用</p>
+    </div>
+    <div class="principle-card">
+      <div class="icon">🔄</div>
+      <h3>螺旋递进</h3>
+      <p>新知识 + 旧知识复现，记忆曲线优化</p>
+    </div>
+    <div class="principle-card">
+      <div class="icon">🎮</div>
+      <h3>游戏驱动</h3>
+      <p>XP积分、连续打卡、段位升级，像玩游戏一样学</p>
+    </div>
+    <div class="principle-card">
+      <div class="icon">⏱️</div>
+      <h3>微量持续</h3>
+      <p>20分钟不长不短，刚好在注意力衰减前结束</p>
+    </div>
+  </div>
+</div>
+
+<!-- 每日流程 -->
+<div class="section">
+  <h2>⏰ 每日20分钟流程</h2>
+  <div class="daily-routine">
+    <div class="routine-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>词汇唤醒 · 3分钟</h4>
+        <p>英译中选择题，8-10个词，快速激活记忆</p>
+      </div>
+    </div>
+    <div class="routine-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>选词填空 · 5分钟</h4>
+        <p>5个句子，选择合适的词填入空白处</p>
+      </div>
+    </div>
+    <div class="routine-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>中译英练习 · 4分钟</h4>
+        <p>5个中文句子，输入英文翻译</p>
+      </div>
+    </div>
+    <div class="routine-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>单词拼写 · 3分钟</h4>
+        <p>听/看中文意思，拼写出英文单词</p>
+      </div>
+    </div>
+    <div class="routine-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>极速挑战 · 5分钟</h4>
+        <p>10道计时选择题，测反应速度和准确度</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏化元素 -->
+<div class="section">
+  <h2>🎮 游戏化元素</h2>
+  <div class="game-features">
+    <div class="feature">
+      <div class="icon">⭐</div>
+      <div class="name">经验值 XP</div>
+      <div class="desc">每题正确+10XP</div>
+    </div>
+    <div class="feature">
+      <div class="icon">🔥</div>
+      <div class="name">连续打卡</div>
+      <div class="desc">每日打卡积累连续天数</div>
+    </div>
+    <div class="feature">
+      <div class="icon">❤️</div>
+      <div class="name">生命值</div>
+      <div class="desc">5条命，错一题扣一条</div>
+    </div>
+    <div class="feature">
+      <div class="icon">🏆</div>
+      <div class="name">成就徽章</div>
+      <div class="desc">达成里程碑获徽章</div>
+    </div>
+  </div>
+</div>
+
+<!-- 等级 & 单元 -->
+<div class="section">
+  <h2>🗺️ 学习地图</h2>
+
+  <!-- Level 1 -->
+  <div class="level current">
+    <div class="level-header">
+      <span class="level-icon">🌱</span>
+      <span class="level-title">Lv.1 重新出发</span>
+      <span class="level-badge">Day 1-28</span>
+    </div>
+    <div class="unit active">
+      <div class="unit-num">1</div>
+      <div class="unit-info">
+        <div class="unit-name">自我介绍与日常</div>
+        <div class="unit-desc">基础动词、日常作息、简单自我介绍</div>
+      </div>
+      <div class="unit-days">Day 1-7</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">2</div>
+      <div class="unit-info">
+        <div class="unit-name">家庭与朋友</div>
+        <div class="unit-desc">家庭成员、描述人物、社交表达</div>
+      </div>
+      <div class="unit-days">Day 8-14</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">3</div>
+      <div class="unit-info">
+        <div class="unit-name">饮食与健康</div>
+        <div class="unit-desc">食物词汇、点餐、健康话题</div>
+      </div>
+      <div class="unit-days">Day 15-21</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">4</div>
+      <div class="unit-info">
+        <div class="unit-name">购物与出行</div>
+        <div class="unit-desc">价格、尺寸、交通、问路</div>
+      </div>
+      <div class="unit-days">Day 22-28</div>
+    </div>
+  </div>
+
+  <!-- Level 2 -->
+  <div class="level">
+    <div class="level-header">
+      <span class="level-icon">🌿</span>
+      <span class="level-title">Lv.2 稳步前进</span>
+      <span class="level-badge">Day 29-84</span>
+    </div>
+    <div class="unit">
+      <div class="unit-num">5</div>
+      <div class="unit-info"><div class="unit-name">工作场景</div><div class="unit-desc">邮件、会议、职场沟通</div></div>
+      <div class="unit-days">Day 29-35</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">6</div>
+      <div class="unit-info"><div class="unit-name">旅行与交通</div><div class="unit-desc">机场、酒店、行程规划</div></div>
+      <div class="unit-days">Day 36-42</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">7</div>
+      <div class="unit-info"><div class="unit-name">科技与媒体</div><div class="unit-desc">互联网、社交媒体、App</div></div>
+      <div class="unit-days">Day 43-49</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">8</div>
+      <div class="unit-info"><div class="unit-name">情感与观点</div><div class="unit-desc">表达感受、同意与反对</div></div>
+      <div class="unit-days">Day 50-56</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">9</div>
+      <div class="unit-info"><div class="unit-name">计划与未来</div><div class="unit-desc">will/going to、目标表达</div></div>
+      <div class="unit-days">Day 57-63</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">10</div>
+      <div class="unit-info"><div class="unit-name">文化差异</div><div class="unit-desc">跨文化沟通、习俗话题</div></div>
+      <div class="unit-days">Day 64-70</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">11</div>
+      <div class="unit-info"><div class="unit-name">问题解决</div><div class="unit-desc">投诉、求助、协商</div></div>
+      <div class="unit-days">Day 71-77</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">12</div>
+      <div class="unit-info"><div class="unit-name">故事讲述</div><div class="unit-desc">叙述经历、过去时态</div></div>
+      <div class="unit-days">Day 78-84</div>
+    </div>
+  </div>
+
+  <!-- Level 3 -->
+  <div class="level">
+    <div class="level-header">
+      <span class="level-icon">🌳</span>
+      <span class="level-title">Lv.3 自信表达</span>
+      <span class="level-badge">Day 85-140</span>
+    </div>
+    <div class="unit">
+      <div class="unit-num">13</div>
+      <div class="unit-info"><div class="unit-name">职场沟通</div><div class="unit-desc">演讲、汇报、面试</div></div>
+      <div class="unit-days">Day 85-91</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">14</div>
+      <div class="unit-info"><div class="unit-name">辩论与说服</div><div class="unit-desc">论证结构、修辞技巧</div></div>
+      <div class="unit-days">Day 92-98</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">15</div>
+      <div class="unit-info"><div class="unit-name">抽象概念</div><div class="unit-desc">成功、幸福、自由等话题</div></div>
+      <div class="unit-days">Day 99-105</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">16</div>
+      <div class="unit-info"><div class="unit-name">新媒体与营销</div><div class="unit-desc">运营术语、内容创作</div></div>
+      <div class="unit-days">Day 106-112</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">17</div>
+      <div class="unit-info"><div class="unit-name">双碳与环保</div><div class="unit-desc">碳中和、可持续发展词汇</div></div>
+      <div class="unit-days">Day 113-119</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">18</div>
+      <div class="unit-info"><div class="unit-name">演讲与表达</div><div class="unit-desc">结构表达、即兴发言</div></div>
+      <div class="unit-days">Day 120-126</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">19</div>
+      <div class="unit-info"><div class="unit-name">时事讨论</div><div class="unit-desc">新闻阅读、观点表达</div></div>
+      <div class="unit-days">Day 127-133</div>
+    </div>
+    <div class="unit">
+      <div class="unit-num">20</div>
+      <div class="unit-info"><div class="unit-name">自由表达</div><div class="unit-desc">综合输出、毕业之作</div></div>
+      <div class="unit-days">Day 134-140</div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
