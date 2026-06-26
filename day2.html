@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 2 · 英语重拾计划</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: #fff; color: #3c3c3c; min-height: 100vh; user-select: none; }
+
+/* ===== 顶部状态栏 ===== */
+.top-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e5e5e5; position: sticky; top: 0; z-index: 100; }
+.top-bar .streak { display: flex; align-items: center; gap: 4px; font-weight: 700; color: #ff9600; font-size: 15px; }
+.top-bar .hearts { display: flex; align-items: center; gap: 2px; }
+.top-bar .heart { font-size: 18px; transition: all 0.3s; }
+.top-bar .heart.lost { opacity: 0.2; transform: scale(0.8); }
+.top-bar .xp { display: flex; align-items: center; gap: 4px; background: #e5f5e0; padding: 4px 12px; border-radius: 20px; font-weight: 700; color: #58cc02; font-size: 14px; }
+
+/* ===== 进度条 ===== */
+.progress-wrap { padding: 0 16px; margin: 8px 0; }
+.progress-bar { height: 8px; background: #e5e5e5; border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #58cc02, #7be02a); border-radius: 4px; transition: width 0.5s ease; }
+.progress-label { font-size: 12px; color: #999; margin-top: 4px; text-align: center; }
+
+/* ===== 主内容区 ===== */
+.main { max-width: 500px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* ===== 回合标题 ===== */
+.round-header { text-align: center; margin: 20px 0 10px; }
+.round-badge { display: inline-block; background: #e5f5e0; color: #58cc02; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin-bottom: 6px; }
+.round-title { font-size: 22px; font-weight: 800; }
+.round-desc { font-size: 13px; color: #999; margin-top: 2px; }
+
+/* ===== 进度点 ===== */
+.dots { display: flex; justify-content: center; gap: 6px; margin: 10px 0 20px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #e5e5e5; transition: all 0.3s; }
+.dot.done { background: #58cc02; }
+.dot.current { background: #58cc02; transform: scale(1.6); }
+.dot.failed { background: #ff4b4b; }
+
+/* ===== 题目卡片 ===== */
+.question-card { background: #fff; border: 2px solid #e5e5e5; border-radius: 16px; padding: 24px; margin-bottom: 12px; transition: all 0.3s; }
+.question-card.correct { border-color: #58cc02; background: #f8fff8; }
+.question-card.wrong { border-color: #ff4b4b; background: #fff8f8; animation: shake 0.5s; }
+.question-num { font-size: 12px; color: #bbb; margin-bottom: 8px; }
+.question-text { font-size: 18px; font-weight: 600; margin-bottom: 16px; line-height: 1.6; }
+.question-hint { font-size: 13px; color: #999; margin-bottom: 12px; font-style: italic; }
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-6px); }
+  40%,80% { transform: translateX(6px); }
+}
+
+/* ===== 选项按钮 (MCQ) ===== */
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { width: 100%; padding: 14px 16px; border: 2px solid #e5e5e5; border-radius: 12px; background: #fff; font-size: 16px; cursor: pointer; text-align: left; transition: all 0.2s; position: relative; overflow: hidden; }
+.option-btn:hover { border-color: #1cb0f6; background: #f0f7ff; }
+.option-btn:active { transform: scale(0.98); }
+.option-btn.selected { border-color: #1cb0f6; background: #e3f1ff; }
+.option-btn.correct-show { border-color: #58cc02; background: #e5f5e0; color: #58cc02; font-weight: 700; }
+.option-btn.wrong-show { border-color: #ff4b4b; background: #ffe5e5; color: #ff4b4b; }
+.option-btn:disabled { pointer-events: none; opacity: 0.7; }
+.option-letter { display: inline-block; width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; font-weight: 700; margin-right: 10px; color: #999; }
+
+/* ===== 输入框 ===== */
+.translate-input { width: 100%; padding: 14px 16px; border: 2px solid #e5e5e5; border-radius: 12px; font-size: 16px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+.translate-input:focus { border-color: #1cb0f6; }
+.translate-input.correct-input { border-color: #58cc02; background: #f8fff8; }
+.translate-input.wrong-input { border-color: #ff4b4b; background: #fff8f8; }
+
+.submit-btn { display: block; width: 100%; padding: 14px; margin-top: 10px; border: none; border-radius: 12px; background: #58cc02; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.submit-btn:hover { background: #46a302; }
+.submit-btn:active { transform: scale(0.97); }
+.submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+/* ===== 反馈提示 ===== */
+.feedback { padding: 12px; border-radius: 10px; font-size: 14px; margin-top: 10px; display: none; }
+.feedback.show { display: block; }
+.feedback.correct { background: #e5f5e0; color: #58a700; }
+.feedback.wrong { background: #ffe5e5; color: #d80000; }
+
+/* ===== 下一题按钮 ===== */
+.next-btn { display: block; width: 100%; padding: 12px; margin-top: 10px; border: 2px solid #58cc02; border-radius: 12px; background: #fff; color: #58cc02; font-size: 15px; font-weight: 700; cursor: pointer; display: none; }
+.next-btn:hover { background: #f8fff8; }
+.next-btn.show { display: block; }
+
+/* ===== 计时器 ===== */
+.timer { text-align: center; font-size: 28px; font-weight: 800; margin: 10px 0; }
+.timer.urgent { color: #ff4b4b; animation: pulse 0.5s infinite; }
+@keyframes pulse { 50% { transform: scale(1.1); } }
+
+/* ===== 结果页 ===== */
+.result-page { text-align: center; padding: 40px 20px; }
+.result-page .trophy { font-size: 80px; animation: bounce 0.6s; }
+@keyframes bounce { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-20px); } 60% { transform: translateY(-10px); } }
+.result-page h2 { font-size: 28px; margin: 16px 0 8px; }
+.result-page .score { font-size: 48px; font-weight: 800; color: #58cc02; }
+.result-page .xp-earned { font-size: 20px; color: #ff9600; font-weight: 700; margin: 10px 0; }
+.result-page .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 300px; margin: 20px auto; }
+.result-stat { background: #f7f7f7; border-radius: 12px; padding: 14px; }
+.result-stat .val { font-size: 24px; font-weight: 800; }
+.result-stat .lbl { font-size: 12px; color: #999; }
+
+.continue-btn { display: inline-block; padding: 14px 40px; background: #58cc02; color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 14px; cursor: pointer; margin-top: 20px; }
+.continue-btn:hover { background: #46a302; }
+
+/* ===== 完成页面 ===== */
+.complete-page { text-align: center; padding: 60px 20px; }
+.complete-page .big-emoji { font-size: 72px; }
+.complete-page h2 { font-size: 24px; margin: 12px 0; }
+.complete-page .tip { color: #888; font-size: 14px; margin: 20px 0; }
+
+/* ===== 今日已完成提示 ===== */
+.already-done { text-align: center; padding: 60px 20px; }
+.already-done .check-icon { font-size: 64px; color: #58cc02; }
+.already-done h2 { font-size: 22px; margin: 16px 0; }
+.already-done p { color: #888; font-size: 14px; }
+
+/* ===== 词汇提示卡片 ===== */
+.vocab-hint { font-size: 13px; color: #aaa; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- 顶部状态栏 -->
+<div class="top-bar">
+  <div class="streak" id="streak-display">🔥 0 天</div>
+  <div class="hearts" id="hearts-display"></div>
+  <div class="xp" id="xp-display">⭐ 0 XP</div>
+</div>
+
+<!-- 进度条 -->
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="progress-label" id="progress-label">准备开始</div>
+</div>
+
+<!-- 进度点 -->
+<div class="dots" id="round-dots"></div>
+
+<!-- 主内容区 -->
+<div class="main" id="main-content"></div>
+
+<script>
+// ===== 存储管理 =====
+const STORAGE_KEY = 'engquest_day2';
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { streak: 0, lastDate: '', totalXP: 0, completed: false };
+  } catch(e) { return { streak: 0, lastDate: '', totalXP: 0, completed: false }; }
+}
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+// ===== 今天日期 =====
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+const data = loadData();
+const today = todayStr();
+
+// ===== 检查今日是否已完成 =====
+if (data.completed) {
+  document.getElementById('main-content').innerHTML = `
+    <div class="already-done">
+      <div class="check-icon">✅</div>
+      <h2>今日练习已完成！</h2>
+      <p>Day 2 打卡成功 🔥 连续 ${data.streak} 天</p>
+      <p>累计 ⭐ ${data.totalXP} XP</p>
+      <p style="margin-top:20px;color:#aaa;">明天再来解锁 Day 3 吧！</p>
+    </div>
+  `;
+}
+
+// ===== 游戏状态 =====
+let hearts = 5;
+let currentXP = data.totalXP || 0;
+let streak = data.streak || 0;
+let currentRound = 0;
+let currentQuestionInRound = 0;
+let roundScores = [0,0,0,0,0];
+let totalCorrect = 0;
+let totalQuestions = 0;
+
+// ===== 更新 UI =====
+function updateUI() {
+  document.getElementById('xp-display').innerHTML = `⭐ ${currentXP} XP`;
+  document.getElementById('streak-display').innerHTML = `🔥 ${streak} 天`;
+  
+  let h = '';
+  for (let i = 0; i < 5; i++) {
+    h += `<span class="heart${i >= hearts ? ' lost' : ''}">${i < hearts ? '❤️' : '🖤'}</span>`;
+  }
+  document.getElementById('hearts-display').innerHTML = h;
+  
+  const totalQs = rounds.flat().length;
+  const done = rounds.slice(0, currentRound).flat().length + currentQuestionInRound;
+  const pct = Math.round((done / totalQs) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Round ${currentRound + 1}/5 · 题目 ${done}/${totalQs}`;
+  
+  let dots = '';
+  for (let i = 0; i < 5; i++) {
+    let cls = '';
+    if (i < currentRound) cls = roundScores[i] >= Math.ceil(rounds[i].length * 0.6) ? 'done' : 'failed';
+    else if (i === currentRound) cls = 'current';
+    dots += `<span class="dot ${cls}"></span>`;
+  }
+  document.getElementById('round-dots').innerHTML = dots;
+}
+
+// ===== Day 2 题目数据：美食购物与日常活动 =====
+
+// Round 1: 词汇匹配 (英→中 选择) — 食品购物基础词汇
+const round1 = [
+  { type: 'mcq', en: 'restaurant', options: ['餐厅', '超市', '厨房', '酒店'], answer: 0 },
+  { type: 'mcq', en: 'delicious', options: ['难吃的', '美味的', '辣的', '甜的'], answer: 1 },
+  { type: 'mcq', en: 'supermarket', options: ['菜市场', '商场', '超市', '便利店'], answer: 2 },
+  { type: 'mcq', en: 'expensive', options: ['便宜的', '巨大的', '昂贵的', '稀有的'], answer: 2 },
+  { type: 'mcq', en: 'vegetable', options: ['水果', '蔬菜', '肉类', '谷物'], answer: 1 },
+  { type: 'mcq', en: 'thirsty', options: ['饥饿的', '口渴的', '疲惫的', '兴奋的'], answer: 1 },
+  { type: 'mcq', en: 'recipe', options: ['食谱', '收据', '菜单', '处方'], answer: 0 },
+  { type: 'mcq', en: 'order', options: ['命令', '点餐', '整理', '安排'], answer: 1 },
+  { type: 'mcq', en: 'cheap', options: ['昂贵的', '便宜的', '稀有的', '精美的'], answer: 1 },
+  { type: 'mcq', en: 'hungry', options: ['口渴的', '疲惫的', '饥饿的', '生气的'], answer: 2 },
+];
+
+// Round 2: 选词填空 — 购物/点餐场景语法
+const round2 = [
+  { type: 'fill', sentence: 'How much _____ this shirt?', blank: '_____', options: ['is', 'are', 'was', 'were'], answer: 0, hint: '提示：this shirt 是单数' },
+  { type: 'fill', sentence: 'I would like _____ a cup of coffee.', blank: '_____', options: ['order', 'to order', 'ordering', 'ordered'], answer: 1, hint: '提示：would like to do something' },
+  { type: 'fill', sentence: 'There _____ some apples on the table.', blank: '_____', options: ['is', 'are', 'was', 'has'], answer: 1, hint: '提示：apples 是复数，用 there be 句型' },
+  { type: 'fill', sentence: 'She _____ to the supermarket every Sunday.', blank: '_____', options: ['go', 'goes', 'going', 'gone'], answer: 1, hint: '提示：She 是第三人称单数' },
+  { type: 'fill', sentence: 'Can I have _____ water, please?', blank: '_____', options: ['a', 'some', 'many', 'few'], answer: 1, hint: '提示：water 是不可数名词，用 some' },
+];
+
+// Round 3: 中译英 — 点餐购物场景
+const round3 = [
+  { type: 'translate', cn: '这个多少钱？', en: 'how much is this', accept: ['how much is this', 'how much does this cost'] },
+  { type: 'translate', cn: '我想点一份炒饭。', en: 'i would like to order fried rice', accept: ['i would like', 'i want to order', 'i would like fried rice'] },
+  { type: 'translate', cn: '这菜太好吃了！', en: 'this dish is so delicious', accept: ['this is so delicious', 'this dish is delicious', 'it is so delicious'] },
+  { type: 'translate', cn: '请问附近有超市吗？', en: 'is there a supermarket nearby', accept: ['is there a supermarket', 'supermarket nearby'] },
+  { type: 'translate', cn: '我饿了，我们去吃饭吧。', en: 'i\'m hungry, let\'s go eat', accept: ['i am hungry', 'let us go eat', 'let us eat'] },
+];
+
+// Round 4: 单词拼写 — 美食购物核心词汇
+const round4 = [
+  { type: 'spell', cn: '餐厅', en: 'restaurant', hint: 'r_____' },
+  { type: 'spell', cn: '美味的', en: 'delicious', hint: 'd_____' },
+  { type: 'spell', cn: '超市', en: 'supermarket', hint: 's_____' },
+  { type: 'spell', cn: '昂贵的', en: 'expensive', hint: 'e_____' },
+  { type: 'spell', cn: '蔬菜', en: 'vegetable', hint: 'v_____' },
+  { type: 'spell', cn: '饥饿的', en: 'hungry', hint: 'h_____' },
+  { type: 'spell', cn: '口渴的', en: 'thirsty', hint: 't_____' },
+  { type: 'spell', cn: '便宜的', en: 'cheap', hint: 'c_____' },
+];
+
+// Round 5: 极速挑战 (混合MCQ，限时3分钟)
+const round5 = [
+  { type: 'mcq', q: '"restaurant" 的中文意思是？', options: ['酒店', '餐厅', '咖啡馆', '酒吧'], answer: 1 },
+  { type: 'mcq', q: 'I\'m _____. Let\'s get something to eat.', options: ['thirsty', 'tired', 'hungry', 'angry'], answer: 2 },
+  { type: 'mcq', q: '"超市" 用英语怎么说？', options: ['mall', 'market', 'supermarket', 'store'], answer: 2 },
+  { type: 'mcq', q: 'This watch is too _____. I can\'t afford it.', options: ['cheap', 'expensive', 'small', 'old'], answer: 1 },
+  { type: 'mcq', q: '"美味的" 的英文是？', options: ['terrible', 'beautiful', 'delicious', 'wonderful'], answer: 2 },
+  { type: 'mcq', q: 'Can I see the _____, please? (我想看菜单)', options: ['recipe', 'menu', 'list', 'bill'], answer: 1 },
+  { type: 'mcq', q: '"order" 在餐厅场景下是什么意思？', options: ['命令', '整理', '点餐', '订购'], answer: 2 },
+  { type: 'mcq', q: 'There _____ a lot of people in the restaurant.', options: ['is', 'are', 'was', 'has'], answer: 1 },
+  { type: 'mcq', q: '"thirsty" 的意思是？', options: ['饥饿的', '口渴的', '疲惫的', '开心的'], answer: 1 },
+  { type: 'mcq', q: 'Would you like _____ to drink?', options: ['something', 'anything', 'nothing', 'everything'], answer: 0 },
+];
+
+const rounds = [round1, round2, round3, round4, round5];
+const roundNames = ['词汇唤醒', '选词填空', '中译英练习', '单词拼写', '极速挑战'];
+const roundDescs = ['选出英文单词对应的中文意思', '选择正确的单词填入空白处', '将中文句子翻译成英文', '根据提示拼写出英文单词', '限时答题，测测你的反应速度'];
+const totalRounds = rounds.length;
+
+// ===== 渲染题目 =====
+let speedTimer = null;
+let speedTimeLeft = 180;
+
+function renderQuestion(roundIdx, qIdx) {
+  const round = rounds[roundIdx];
+  const q = round[qIdx];
+  const totalInRound = round.length;
+  const container = document.getElementById('main-content');
+  
+  let html = '';
+  html += `<div class="round-header">`;
+  html += `<div class="round-badge">ROUND ${roundIdx + 1}/5</div>`;
+  html += `<div class="round-title">${roundNames[roundIdx]}</div>`;
+  html += `<div class="round-desc">${roundDescs[roundIdx]}</div>`;
+  html += `</div>`;
+  
+  if (roundIdx === 4) {
+    html += `<div class="timer" id="speed-timer">${formatTime(speedTimeLeft)}</div>`;
+  }
+  
+  html += `<div class="question-card" id="q-card">`;
+  html += `<div class="question-num">第 ${qIdx + 1}/${totalInRound} 题</div>`;
+  
+  if (q.type === 'mcq') {
+    const prompt = q.en ? `"<strong>${q.en}</strong>" 的中文意思是？` : q.q;
+    html += `<div class="question-text">${prompt}</div>`;
+    html += `<div class="options">`;
+    const labels = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, i) => {
+      html += `<button class="option-btn" onclick="answerMCQ(${roundIdx}, ${qIdx}, ${i}, this)" id="opt-${i}">`;
+      html += `<span class="option-letter">${labels[i]}</span>${opt}`;
+      html += `</button>`;
+    });
+    html += `</div>`;
+  } else if (q.type === 'fill') {
+    html += `<div class="question-text">${q.sentence.replace(q.blank, '<u style="color:#58cc02;font-weight:700;">______</u>')}</div>`;
+    if (q.hint) html += `<div class="question-hint">${q.hint}</div>`;
+    html += `<div class="options">`;
+    const labels = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, i) => {
+      html += `<button class="option-btn" onclick="answerMCQ(${roundIdx}, ${qIdx}, ${i}, this)" id="opt-${i}">`;
+      html += `<span class="option-letter">${labels[i]}</span>${opt}`;
+      html += `</button>`;
+    });
+    html += `</div>`;
+  } else if (q.type === 'translate') {
+    html += `<div class="question-text">📝 翻译成英文：<br>"${q.cn}"</div>`;
+    html += `<input type="text" class="translate-input" id="trans-input" placeholder="输入英文翻译..." autocomplete="off">`;
+    html += `<button class="submit-btn" onclick="answerTranslate(${roundIdx}, ${qIdx})">确认提交</button>`;
+    html += `<div class="feedback" id="feedback"></div>`;
+    html += `<button class="next-btn" id="next-btn" onclick="nextQuestion()">继续 →</button>`;
+  } else if (q.type === 'spell') {
+    html += `<div class="question-text">🔤 拼写单词：<br>"${q.cn}"</div>`;
+    html += `<div class="question-hint">开头提示：${q.hint}</div>`;
+    html += `<input type="text" class="translate-input" id="spell-input" placeholder="输入完整单词..." autocomplete="off" autocapitalize="off">`;
+    html += `<button class="submit-btn" onclick="answerSpell(${roundIdx}, ${qIdx})">确认提交</button>`;
+    html += `<div class="feedback" id="feedback"></div>`;
+    html += `<button class="next-btn" id="next-btn" onclick="nextQuestion()">继续 →</button>`;
+  }
+  
+  html += `<div class="feedback" id="feedback-mcq"></div>`;
+  html += `<button class="next-btn" id="next-btn-mcq" onclick="nextQuestion()">继续 →</button>`;
+  html += `</div>`;
+  
+  container.innerHTML = html;
+  
+  setTimeout(() => {
+    const inp = document.getElementById('trans-input') || document.getElementById('spell-input');
+    if (inp) inp.focus();
+  }, 200);
+  
+  updateUI();
+}
+
+// ===== MCQ 答题 =====
+function answerMCQ(roundIdx, qIdx, chosen, btn) {
+  const round = rounds[roundIdx];
+  const q = round[qIdx];
+  const correct = q.answer === chosen;
+  
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  document.getElementById('opt-' + q.answer).classList.add('correct-show');
+  
+  if (correct) {
+    btn.classList.add('correct-show');
+    document.getElementById('q-card').classList.add('correct');
+    roundScores[roundIdx]++;
+    totalCorrect++;
+    currentXP += 10;
+    showMCQFeedback('correct', '✅ 正确！+10 XP');
+  } else {
+    btn.classList.add('wrong-show');
+    document.getElementById('q-card').classList.add('wrong');
+    hearts--;
+    showMCQFeedback('wrong', '❌ 错误，正确答案已标出');
+  }
+  totalQuestions++;
+  
+  if (hearts <= 0) {
+    setTimeout(() => showGameOver(), 1200);
+    return;
+  }
+  
+  document.getElementById('next-btn-mcq').classList.add('show');
+  updateUI();
+}
+
+function showMCQFeedback(type, msg) {
+  const fb = document.getElementById('feedback-mcq');
+  fb.className = 'feedback show ' + type;
+  fb.textContent = msg;
+}
+
+// ===== 翻译答题 =====
+function answerTranslate(roundIdx, qIdx) {
+  const q = rounds[roundIdx][qIdx];
+  const input = document.getElementById('trans-input');
+  const userAnswer = input.value.trim().toLowerCase();
+  
+  if (!userAnswer) return;
+  
+  input.disabled = true;
+  document.querySelector('.submit-btn').disabled = true;
+  
+  let isCorrect = false;
+  if (userAnswer === q.en.toLowerCase()) {
+    isCorrect = true;
+  } else {
+    for (const acc of q.accept) {
+      if (userAnswer.includes(acc.toLowerCase())) {
+        isCorrect = true;
+        break;
+      }
+    }
+  }
+  
+  const card = document.getElementById('q-card');
+  const fb = document.getElementById('feedback');
+  const nextBtn = document.getElementById('next-btn');
+  
+  if (isCorrect) {
+    input.classList.add('correct-input');
+    card.classList.add('correct');
+    fb.className = 'feedback show correct';
+    fb.innerHTML = '✅ 正确！+10 XP<br>参考答案：' + q.en;
+    roundScores[roundIdx]++;
+    totalCorrect++;
+    currentXP += 10;
+  } else {
+    input.classList.add('wrong-input');
+    card.classList.add('wrong');
+    fb.className = 'feedback show wrong';
+    fb.innerHTML = '❌ 再想想看<br>正确答案：' + q.en;
+    hearts--;
+  }
+  totalQuestions++;
+  
+  if (hearts <= 0) {
+    setTimeout(() => showGameOver(), 1200);
+    return;
+  }
+  
+  nextBtn.classList.add('show');
+  updateUI();
+}
+
+// ===== 拼写答题 =====
+function answerSpell(roundIdx, qIdx) {
+  const q = rounds[roundIdx][qIdx];
+  const input = document.getElementById('spell-input');
+  const userAnswer = input.value.trim().toLowerCase();
+  
+  if (!userAnswer) return;
+  
+  input.disabled = true;
+  document.querySelector('.submit-btn').disabled = true;
+  
+  const isCorrect = userAnswer === q.en.toLowerCase();
+  const card = document.getElementById('q-card');
+  const fb = document.getElementById('feedback');
+  const nextBtn = document.getElementById('next-btn');
+  
+  if (isCorrect) {
+    input.classList.add('correct-input');
+    card.classList.add('correct');
+    fb.className = 'feedback show correct';
+    fb.innerHTML = '✅ 拼写正确！+10 XP';
+    roundScores[roundIdx]++;
+    totalCorrect++;
+    currentXP += 10;
+  } else {
+    input.classList.add('wrong-input');
+    card.classList.add('wrong');
+    fb.className = 'feedback show wrong';
+    fb.innerHTML = '❌ 正确答案：<strong>' + q.en + '</strong>';
+    hearts--;
+  }
+  totalQuestions++;
+  
+  if (hearts <= 0) {
+    setTimeout(() => showGameOver(), 1200);
+    return;
+  }
+  
+  nextBtn.classList.add('show');
+  updateUI();
+}
+
+// ===== 下一题 =====
+function nextQuestion() {
+  currentQuestionInRound++;
+  const round = rounds[currentRound];
+  
+  if (currentQuestionInRound >= round.length) {
+    currentRound++;
+    currentQuestionInRound = 0;
+    
+    if (currentRound >= totalRounds) {
+      showResult();
+      return;
+    }
+    
+    if (currentRound === 4) {
+      startSpeedRound();
+    }
+  }
+  
+  renderQuestion(currentRound, currentQuestionInRound);
+}
+
+// ===== 极速挑战 =====
+function startSpeedRound() {
+  speedTimeLeft = 180;
+  renderQuestion(currentRound, currentQuestionInRound);
+  speedTimer = setInterval(() => {
+    speedTimeLeft--;
+    const timerEl = document.getElementById('speed-timer');
+    if (timerEl) {
+      timerEl.textContent = formatTime(speedTimeLeft);
+      if (speedTimeLeft <= 30) timerEl.classList.add('urgent');
+    }
+    if (speedTimeLeft <= 0) {
+      clearInterval(speedTimer);
+      showResult();
+    }
+  }, 1000);
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `⏱ ${m}:${String(s).padStart(2, '0')}`;
+}
+
+// ===== 游戏结束 (生命归零) =====
+function showGameOver() {
+  if (speedTimer) clearInterval(speedTimer);
+  const container = document.getElementById('main-content');
+  const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  
+  container.innerHTML = `
+    <div class="result-page">
+      <div style="font-size:64px;">💔</div>
+      <h2>生命值耗尽！</h2>
+      <p style="color:#ff4b4b;margin:10px 0;">5条命用完了，明天再来挑战吧！</p>
+      <div class="stats-grid">
+        <div class="result-stat"><div class="val">${totalCorrect}/${totalQuestions}</div><div class="lbl">正确/总题数</div></div>
+        <div class="result-stat"><div class="val">${accuracy}%</div><div class="lbl">正确率</div></div>
+      </div>
+      <p style="color:#888;margin-top:20px;">每日练习只有5条命，好好珍惜哦～</p>
+    </div>
+  `;
+  saveProgress(false);
+}
+
+// ===== 显示回合结果 =====
+function showResult() {
+  if (speedTimer) clearInterval(speedTimer);
+  
+  const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  const dayXP = totalCorrect * 10;
+  const container = document.getElementById('main-content');
+  
+  let trophyEmoji = '🌟';
+  let msg = '继续加油！';
+  if (accuracy >= 90) { trophyEmoji = '🏆'; msg = '太棒了！你是英语之星！'; }
+  else if (accuracy >= 70) { trophyEmoji = '🎉'; msg = '不错哦！继续保持！'; }
+  else if (accuracy >= 50) { trophyEmoji = '💪'; msg = '还有进步空间，加油！'; }
+  else { trophyEmoji = '📚'; msg = '别灰心，坚持就是胜利！'; }
+  
+  container.innerHTML = `
+    <div class="result-page">
+      <div class="trophy">${trophyEmoji}</div>
+      <h2>${msg}</h2>
+      <div class="score">${accuracy}%</div>
+      <div class="xp-earned">+${dayXP} XP</div>
+      <div class="stats-grid">
+        <div class="result-stat"><div class="val">${totalCorrect}/${totalQuestions}</div><div class="lbl">正确/总题数</div></div>
+        <div class="result-stat"><div class="val">🔥 ${streak + 1} 天</div><div class="lbl">连续打卡</div></div>
+        <div class="result-stat"><div class="val">⭐ ${currentXP}</div><div class="lbl">累计经验</div></div>
+        <div class="result-stat"><div class="val">❤️ ${hearts}</div><div class="lbl">剩余生命</div></div>
+      </div>
+      <p style="margin-top:16px;font-size:14px;color:#666;">
+        Round 1: ${roundScores[0]}/${round1.length} · 
+        Round 2: ${roundScores[1]}/${round2.length} · 
+        Round 3: ${roundScores[2]}/${round3.length}<br>
+        Round 4: ${roundScores[3]}/${round4.length} · 
+        Round 5: ${roundScores[4]}/${round5.length}
+      </p>
+      <button class="continue-btn" onclick="finishDay()">完成打卡 ✅</button>
+    </div>
+  `;
+  
+  updateUI();
+}
+
+// ===== 完成打卡 =====
+function finishDay() {
+  saveProgress(true);
+  const container = document.getElementById('main-content');
+  const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  
+  let badgeHTML = '';
+  if (accuracy >= 90) badgeHTML = '<div style="font-size:14px;color:#ff9600;margin:8px 0;">🏅 获得徽章：美食达人</div>';
+  else if (streak + 1 >= 7) badgeHTML = '<div style="font-size:14px;color:#ff9600;margin:8px 0;">🏅 获得徽章：一周坚持</div>';
+  
+  container.innerHTML = `
+    <div class="complete-page">
+      <div class="big-emoji">🎊</div>
+      <h2>Day 2 打卡成功！</h2>
+      ${badgeHTML}
+      <p style="color:#58cc02;font-weight:700;font-size:16px;">+${totalCorrect * 10} XP · 🔥 连续 ${streak + 1} 天</p>
+      <div class="tip">
+        💡 <strong>今日重点词汇：</strong><br>
+        restaurant · delicious · supermarket · expensive · vegetable<br>
+        thirsty · recipe · order · cheap · hungry
+      </div>
+      <p style="color:#bbb;font-size:13px;">明天同一时间，Day 3 见！</p>
+    </div>
+  `;
+}
+
+// ===== 保存进度 =====
+function saveProgress(completed) {
+  if (completed) {
+    data.completed = true;
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+    
+    if (data.lastDate === yStr) {
+      data.streak = (data.streak || 0) + 1;
+    } else if (data.lastDate === today) {
+      // 今天已经打过卡
+    } else {
+      data.streak = 1;
+    }
+    data.lastDate = today;
+    data.totalXP = currentXP;
+    streak = data.streak;
+  }
+  saveData(data);
+  updateUI();
+}
+
+// ===== 初始化 =====
+function init() {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+  
+  if (data.lastDate === yStr) {
+    streak = data.streak;
+  } else if (data.lastDate !== today) {
+    if (data.lastDate) streak = 0;
+    data.streak = streak;
+  } else {
+    streak = data.streak;
+  }
+  
+  if (data.completed) return;
+  
+  currentXP = data.totalXP || 0;
+  updateUI();
+  renderQuestion(0, 0);
+}
+
+init();
+</script>
+
+</body>
+</html>
